@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('research_grants', function (Blueprint $table) {
+        Schema::create('academicians', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->decimal('grant_amount', 15, 2);
-            $table->string('grant_provider');
-            $table->integer('duration');
-            $table->foreignId('academician_id')->constrained('academicians')->onDelete('cascade');
+            $table->string('name');
+            $table->string('email');
+            $table->string('college');
+            $table->string('department');
+            $table->string('position');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('research_grants');
+        Schema::dropIfExists('academicians');
     }
 };

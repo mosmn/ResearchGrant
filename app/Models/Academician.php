@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Academician extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'name', 'email', 'college', 'department', 'position', 'user_id'
     ];

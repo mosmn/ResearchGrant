@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('academicians', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('email');
+            $table->string('college');
+            $table->string('department');
+            $table->string('position');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

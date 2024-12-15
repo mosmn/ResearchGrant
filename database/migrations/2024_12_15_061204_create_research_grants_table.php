@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('research_grants', function (Blueprint $table) {
             $table->id();
+            $table->string('title');
+            $table->decimal('grant_amount', 15, 2);
+            $table->string('grant_provider');
+            $table->integer('duration');
+            $table->foreignId('academician_id')->constrained('academicians')->onDelete('cascade');
             $table->timestamps();
         });
     }

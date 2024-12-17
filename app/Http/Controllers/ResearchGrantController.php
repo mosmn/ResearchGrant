@@ -10,7 +10,21 @@ class ResearchGrantController extends Controller
 {
     public function index()
     {
-        $grants = ResearchGrant::with('projectLeader')->latest()->paginate(10);
+        $user = auth()->user();
+        
+        if ($user->role === 'Admin') {
+            $grants = ResearchGrant::with('projectLeader', 'teamMembers')->latest()->paginate(10);
+        } else {
+            $academician = $user->academician;
+            $grants = ResearchGrant::with('projectLeader', 'teamMembers')
+                ->where('academician_id', $academician->id)
+                ->orWhereHas('teamMembers', function($query) use ($academician) {
+                    $query->where('academician_id', $academician->id);
+                })
+                ->latest()
+                ->paginate(10);
+        }
+        
         return view('grants.index', compact('grants'));
     }
 
@@ -63,8 +77,20 @@ class ResearchGrantController extends Controller
         return redirect()->route('grants.index')->with('success', 'Research grant updated successfully.');
     }
 
+    public function myGrants()
+    {
+        $grants = ResearchGrant::where('academician_id', auth()->user()->academician->id)
+            ->with('projectLeader')
+            ->latest()
+            ->paginate(10);
+        
+        return view('grants.index', compact('grants'));
+    }
+
     public function updateMembers(Request $request, ResearchGrant $grant)
     {
+        $this->authorize('manage-members', $grant);
+        
         $validated = $request->validate([
             'member_ids' => 'required|array',
             'member_ids.*' => 'exists:academicians,id'

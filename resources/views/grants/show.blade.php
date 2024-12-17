@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+@section('breadcrumbs')
+<li class="breadcrumb-item"><a href="{{ route('grants.index') }}">Research Grants</a></li>
+<li class="breadcrumb-item active">{{ $grant->title }}</li>
+@endsection
+
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
@@ -72,7 +77,7 @@
                 </div>
             </div>
 
-            @can('admin-executive')
+            @can('manage-members', $grant)
             <div class="card">
                 <div class="card-header">Manage Team Members</div>
                 <div class="card-body">
@@ -93,7 +98,9 @@
                     </form>
                 </div>
             </div>
+            @endcan
 
+            @can('manage-milestones', $grant)
             <div class="card mt-4">
                 <div class="card-header">Manage Milestones</div>
                 <div class="card-body">
@@ -122,6 +129,7 @@
                                 <th>Deliverable</th>
                                 <th>Target Date</th>
                                 <th>Status</th>
+                                <th>Last Updated</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -135,13 +143,20 @@
                                     <form action="{{ route('milestones.update', [$grant, $milestone]) }}" method="POST">
                                         @csrf
                                         @method('PUT')
-                                        <select name="status" class="form-select" onchange="this.form.submit()">
-                                            <option value="pending" {{ $milestone->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                            <option value="in_progress" {{ $milestone->status == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                                            <option value="completed" {{ $milestone->status == 'completed' ? 'selected' : '' }}>Completed</option>
-                                        </select>
+                                        <div class="mb-2">
+                                            <select name="status" class="form-select">
+                                                <option value="pending" {{ $milestone->status === 'Pending' ? 'selected' : '' }}>Pending</option>
+                                                <option value="in progress" {{ $milestone->status === 'In Progress' ? 'selected' : '' }}>In Progress</option>
+                                                <option value="completed" {{ $milestone->status === 'Completed' ? 'selected' : '' }}>Completed</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-2">
+                                            <textarea name="remark" class="form-control" placeholder="Add remarks">{{ $milestone->remark }}</textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-sm">Update</button>
                                     </form>
                                 </td>
+                                <td>{{ $milestone->updated_at->format('Y-m-d') }}</td>
                                 <td>
                                     <form action="{{ route('milestones.destroy', [$grant, $milestone]) }}" method="POST" class="d-inline">
                                         @csrf

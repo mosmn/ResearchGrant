@@ -1,5 +1,10 @@
 @extends('layouts.app')
 
+@section('breadcrumbs')
+<li class="breadcrumb-item"><a href="{{ route('grants.index') }}">Research Grants</a></li>
+<li class="breadcrumb-item active">Create New Grant</li>
+@endsection
+
 @section('content')
 <div class="container">
     <div class="row justify-content-center">

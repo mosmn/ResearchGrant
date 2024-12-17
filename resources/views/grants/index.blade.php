@@ -1,5 +1,8 @@
-
 @extends('layouts.app')
+
+@section('breadcrumbs')
+<li class="breadcrumb-item active">Research Grants</li>
+@endsection
 
 @section('content')
 <div class="container">
@@ -26,6 +29,7 @@
                                     <th>Provider</th>
                                     <th>Duration (months)</th>
                                     <th>Project Leader</th>
+                                    <th>Your Role</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -37,6 +41,17 @@
                                     <td>{{ $grant->grant_provider }}</td>
                                     <td>{{ $grant->duration }}</td>
                                     <td>{{ $grant->projectLeader->name }}</td>
+                                    <td>
+                                        @if(auth()->user()->role === 'Admin')
+                                            Administrator
+                                        @elseif($grant->academician_id === optional(auth()->user()->academician)->id)
+                                            Project Leader
+                                        @elseif($grant->teamMembers->contains(optional(auth()->user()->academician)->id))
+                                            Team Member
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
                                     <td class="d-flex gap-2">
                                         <a href="{{ route('grants.show', $grant) }}" class="btn btn-sm btn-info">View</a>
                                         @can('admin-executive')

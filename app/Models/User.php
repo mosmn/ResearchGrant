@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -49,5 +50,20 @@ class User extends Authenticatable
     public function academician()
     {
         return $this->hasOne(Academician::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isIRMC()
+    {
+        return $this->role === 'irmc';
+    }
+
+    public function isProjectLeader()
+    {
+        return $this->academician && $this->academician->leadingGrants()->exists();
     }
 }

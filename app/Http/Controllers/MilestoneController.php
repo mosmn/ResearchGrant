@@ -29,15 +29,16 @@ class MilestoneController extends Controller
      */
     public function store(Request $request, ResearchGrant $grant)
     {
+        $this->authorize('manage-milestones', $grant);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'deliverable' => 'required|string',
             'target_completion_date' => 'required|date',
         ]);
 
-        $grant->milestones()->create($validated);
-        return redirect()->route('grants.show', $grant)
-            ->with('success', 'Milestone added successfully.');
+        $grant->milestones()->create($validated + ['status' => 'pending']);
+        return back()->with('success', 'Milestone created successfully.');
     }
 
     /**
@@ -61,19 +62,15 @@ class MilestoneController extends Controller
      */
     public function update(Request $request, ResearchGrant $grant, Milestone $milestone)
     {
+        $this->authorize('manage-milestones', $grant);
+
         $validated = $request->validate([
-            'status' => 'required|in:pending,in_progress,completed',
+            'status' => 'required|in:pending,in progress,completed',
             'remark' => 'nullable|string',
         ]);
 
-        $milestone->update([
-            'status' => $validated['status'],
-            'remark' => $validated['remark'],
-            'date_updated' => now(),
-        ]);
-
-        return redirect()->route('grants.show', $grant)
-            ->with('success', 'Milestone updated successfully.');
+        $milestone->update($validated);
+        return back()->with('success', 'Milestone updated successfully.');
     }
 
     /**

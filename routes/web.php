@@ -34,21 +34,22 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin Executive only routes
     Route::middleware(['can:admin-executive'])->group(function () {
-        Route::resource('grants', ResearchGrantController::class);
-        Route::post('/grants/{grant}/members', [ResearchGrantController::class, 'updateMembers'])->name('grants.members.update');
+        Route::resource('grants', ResearchGrantController::class)->except(['index', 'show']);
     });
 
-    // Routes accessible by all authenticated users (moved after resource routes)
+    // Routes accessible by all authenticated users
     Route::get('/grants', [ResearchGrantController::class, 'index'])->name('grants.index');
     Route::get('/grants/{grant}', [ResearchGrantController::class, 'show'])->name('grants.show');
 
     // Project Leader routes
     Route::middleware(['can:project-leader'])->group(function () {
         Route::get('/my-grants', [ResearchGrantController::class, 'myGrants'])->name('grants.my');
-        Route::post('/grants/{grant}/members', [ResearchGrantController::class, 'updateMembers'])
-            ->middleware('can:manage-grant,grant')
-            ->name('grants.members.update');
     });
+
+    // Grant management routes (accessible by both admin and project leaders)
+    Route::post('/grants/{grant}/members', [ResearchGrantController::class, 'updateMembers'])
+        ->middleware('can:manage-members,grant')
+        ->name('grants.members.update');
 
     // Milestone routes with grant management authorization
     Route::middleware(['can:manage-grant,grant'])->group(function () {

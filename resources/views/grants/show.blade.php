@@ -12,14 +12,16 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>Research Grant Details</span>
-                    @can('admin-executive')
+                    @can('manage-grant', $grant)
                         <div>
                             <a href="{{ route('grants.edit', $grant) }}" class="btn btn-primary">Edit</a>
+                            @can('admin-executive')
                             <form action="{{ route('grants.destroy', $grant) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
                             </form>
+                            @endcan
                         </div>
                     @endcan
                 </div>

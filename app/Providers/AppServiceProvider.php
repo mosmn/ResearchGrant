@@ -34,18 +34,18 @@ class AppServiceProvider extends ServiceProvider
             return $user->role === 'Academician' && $user->academician && $user->academician->leadingGrants()->exists();
         });
 
-        Gate::define('manage-grant', function (User $user, ResearchGrant $grant) {
-            return $user->role === 'Admin' || 
-                   ($user->academician && $grant->academician_id === $user->academician->id);
+        Gate::define('manage-grant', function (User $user) {
+            return in_array($user->role, ['Admin', 'Staff']) || 
+                   ($user->academician && $user->academician->leadingGrants()->exists());
         });
 
         Gate::define('manage-members', function (User $user, ResearchGrant $grant) {
-            return $user->role === 'Admin' || 
+            return in_array($user->role, ['Admin', 'Staff']) || 
                    ($user->academician && $grant->academician_id === $user->academician->id);
         });
 
         Gate::define('manage-milestones', function (User $user, ResearchGrant $grant) {
-            return $user->role === 'Admin' || 
+            return in_array($user->role, ['Admin', 'Staff']) || 
                    ($user->academician && $grant->academician_id === $user->academician->id);
         });
     }

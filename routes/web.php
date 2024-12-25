@@ -28,13 +28,9 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 Route::middleware(['auth'])->group(function () {
     // Admin Executive and iRMC staff routes
-    Route::middleware(['can:admin-executive,irmc-staff'])->group(function () {
-        Route::resource('academicians', AcademicianController::class);
-    });
-
-    // Admin Executive only routes
-    Route::middleware(['can:admin-executive'])->group(function () {
+    Route::middleware(['can:manage-grant'])->group(function () {
         Route::resource('grants', ResearchGrantController::class)->except(['index', 'show']);
+        Route::resource('academicians', AcademicianController::class);
     });
 
     // Routes accessible by all authenticated users

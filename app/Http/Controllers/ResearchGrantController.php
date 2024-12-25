@@ -8,24 +8,56 @@ use Illuminate\Http\Request;
 
 class ResearchGrantController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $user = auth()->user();
+        $query = ResearchGrant::with('projectLeader', 'teamMembers');
         
-        if ($user->role === 'Admin') {
-            $grants = ResearchGrant::with('projectLeader', 'teamMembers')->latest()->paginate(10);
-        } else {
-            $academician = $user->academician;
-            $grants = ResearchGrant::with('projectLeader', 'teamMembers')
-                ->where('academician_id', $academician->id)
-                ->orWhereHas('teamMembers', function($query) use ($academician) {
-                    $query->where('academician_id', $academician->id);
-                })
-                ->latest()
-                ->paginate(10);
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('grant_provider', 'like', "%{$search}%")
+                  ->orWhereHas('projectLeader', function($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
+                  });
+            });
         }
+
+        // Filters
+        if ($request->filled('provider')) {
+            $query->where('grant_provider', $request->provider);
+        }
+
+        if ($request->filled('min_amount')) {
+            $query->where('grant_amount', '>=', $request->min_amount);
+        }
+
+        if ($request->filled('max_amount')) {
+            $query->where('grant_amount', '<=', $request->max_amount);
+        }
+
+        // Sorting
+        $sortField = $request->get('sort', 'created_at');
+        $sortDirection = $request->get('direction', 'desc');
+        $query->orderBy($sortField, $sortDirection);
+
+        // User role based filtering
+        $user = auth()->user();
+        if (!in_array($user->role, ['Admin', 'Staff'])) {
+            $academician = $user->academician;
+            $query->where(function($q) use ($academician) {
+                $q->where('academician_id', $academician->id)
+                  ->orWhereHas('teamMembers', function($q) use ($academician) {
+                      $q->where('academician_id', $academician->id);
+                  });
+            });
+        }
+
+        $grants = $query->paginate(10)->withQueryString();
+        $providers = ResearchGrant::distinct('grant_provider')->pluck('grant_provider');
         
-        return view('grants.index', compact('grants'));
+        return view('grants.index', compact('grants', 'providers'));
     }
 
     public function create()

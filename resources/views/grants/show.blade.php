@@ -12,7 +12,7 @@
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <span>Research Grant Details</span>
-                    @can('manage-grant', $grant)
+                    @can('manage-grant')
                         <div>
                             <a href="{{ route('grants.edit', $grant) }}" class="btn btn-primary">Edit</a>
                             @can('admin-executive')
@@ -48,6 +48,11 @@
                     </div>
 
                     <div class="mb-4">
+                        <h5>Start Date</h5>
+                        <p>{{ $grant->start_date->format('d M Y') }}</p>
+                    </div>
+
+                    <div class="mb-4">
                         <h5>Project Leader</h5>
                         <p>{{ $grant->projectLeader->name }}</p>
                     </div>
@@ -66,8 +71,8 @@
                         <ul class="list-unstyled">
                             @foreach($grant->milestones as $milestone)
                                 <li class="mb-2">
-                                    <strong>{{ $milestone->title }}</strong><br>
-                                    Due: {{ $milestone->due_date }}
+                                    <strong>{{ $milestone->name }}</strong> - {{ $milestone->deliverable }}<br>
+                                    Due: {{ $milestone->target_completion_date }}<br>
                                 </li>
                             @endforeach
                         </ul>
@@ -80,26 +85,76 @@
             </div>
 
             @can('manage-members', $grant)
-            <div class="card">
+            <div class="card mt-4">
                 <div class="card-header">Manage Team Members</div>
                 <div class="card-body">
                     <form action="{{ route('grants.members.update', $grant) }}" method="POST">
                         @csrf
                         <div class="mb-3">
-                            <label class="form-label">Select Team Members</label>
-                            <select name="member_ids[]" class="form-select" multiple>
-                                @foreach($availableAcademicians as $academician)
-                                    <option value="{{ $academician->id }}"
-                                        {{ $grant->teamMembers->contains($academician->id) ? 'selected' : '' }}>
-                                        {{ $academician->name }}
-                                    </option>
+                            <label class="form-label">Current Team Members</label>
+                            <div class="list-group mb-3">
+                                @foreach($grant->teamMembers as $member)
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ $member->name }}
+                                        <button type="button" class="btn btn-danger btn-sm" 
+                                            onclick="removeMember({{ $member->id }}, '{{ $member->name }}')"
+                                            @if($grant->teamMembers->count() <= 1) disabled @endif>
+                                            Remove
+                                        </button>
+                                    </div>
                                 @endforeach
-                            </select>
+                            </div>
+
+                            <label class="form-label">Add New Team Members</label>
+                            <div class="list-group">
+                                @foreach($availableAcademicians as $academician)
+                                    <label class="list-group-item">
+                                        <input type="checkbox" name="member_ids[]" 
+                                            value="{{ $academician->id }}" class="form-check-input me-2">
+                                        {{ $academician->name }}
+                                    </label>
+                                @endforeach
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Update Team Members</button>
+                        <button type="submit" class="btn btn-primary">Add Selected Members</button>
                     </form>
                 </div>
             </div>
+
+            {{-- Add this modal for confirmation --}}
+            <div class="modal fade" id="removeMemberModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Remove Team Member</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to remove <span id="memberName"></span> from the team?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <form action="{{ route('grants.members.remove', $grant) }}" method="POST" id="removeMemberForm">
+                                @csrf
+                                @method('DELETE')
+                                <input type="hidden" name="member_id" id="memberIdInput">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-danger">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @push('scripts')
+            <script>
+                function removeMember(memberId, memberName) {
+                    document.getElementById('memberName').textContent = memberName;
+                    document.getElementById('memberIdInput').value = memberId;
+                    var modal = new bootstrap.Modal(document.getElementById('removeMemberModal'));
+                    modal.show();
+                }
+            </script>
+            @endpush
             @endcan
 
             @can('manage-milestones', $grant)

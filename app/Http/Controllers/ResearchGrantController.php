@@ -10,7 +10,7 @@ class ResearchGrantController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ResearchGrant::with('projectLeader', 'teamMembers');
+        $query = ResearchGrant::with(['projectLeader', 'teamMembers', 'milestones']);  // Add milestones to eager loading
         
         // Search
         if ($request->filled('search')) {
@@ -73,7 +73,8 @@ class ResearchGrantController extends Controller
             'grant_amount' => 'required|numeric|min:0',
             'grant_provider' => 'required|string|max:255',
             'duration' => 'required|integer|min:1',
-            'academician_id' => 'required|exists:academicians,id'
+            'academician_id' => 'required|exists:academicians,id',
+            'start_date' => 'required|date'  // Add this line
         ]);
 
         ResearchGrant::create($validated);
@@ -102,7 +103,8 @@ class ResearchGrantController extends Controller
             'grant_amount' => 'required|numeric|min:0',
             'grant_provider' => 'required|string|max:255',
             'duration' => 'required|integer|min:1',
-            'academician_id' => 'required|exists:academicians,id'
+            'academician_id' => 'required|exists:academicians,id',
+            'start_date' => 'required|date'  // Add this line
         ]);
 
         $grant->update($validated);
@@ -131,6 +133,22 @@ class ResearchGrantController extends Controller
         $grant->teamMembers()->sync($validated['member_ids']);
         return redirect()->route('grants.show', $grant)
             ->with('success', 'Team members updated successfully.');
+    }
+
+    public function removeMember(Request $request, ResearchGrant $grant)
+    {
+        $this->authorize('manage-members', $grant);
+        
+        $validated = $request->validate([
+            'member_id' => 'required|exists:academicians,id'
+        ]);
+
+        if ($grant->teamMembers->count() <= 1) {
+            return back()->with('error', 'Cannot remove the last team member.');
+        }
+
+        $grant->teamMembers()->detach($validated['member_id']);
+        return back()->with('success', 'Team member removed successfully.');
     }
 
     public function destroy(ResearchGrant $grant)

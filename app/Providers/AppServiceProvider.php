@@ -35,8 +35,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('manage-grant', function (User $user) {
-            return in_array($user->role, ['Admin', 'Staff']) || 
-                   ($user->academician && $user->academician->leadingGrants()->exists());
+            return in_array($user->role, ['Admin', 'Staff']);  // Remove the project leader condition
         });
 
         Gate::define('manage-members', function (User $user, ResearchGrant $grant) {

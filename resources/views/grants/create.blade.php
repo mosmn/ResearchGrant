@@ -53,6 +53,15 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control @error('start_date') is-invalid @enderror" 
+                                id="start_date" name="start_date" value="{{ old('start_date') }}" required>
+                            @error('start_date')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
                             <label for="academician_id" class="form-label">Project Leader</label>
                             <select class="form-select @error('academician_id') is-invalid @enderror" 
                                 id="academician_id" name="academician_id" required>

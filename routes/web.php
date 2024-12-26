@@ -27,7 +27,7 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::middleware(['auth'])->group(function () {
-    // Admin Executive and iRMC staff routes
+    // Admin and Staff only routes
     Route::middleware(['can:manage-grant'])->group(function () {
         Route::resource('grants', ResearchGrantController::class)->except(['index', 'show']);
         Route::resource('academicians', AcademicianController::class);
@@ -37,18 +37,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/grants', [ResearchGrantController::class, 'index'])->name('grants.index');
     Route::get('/grants/{grant}', [ResearchGrantController::class, 'show'])->name('grants.show');
 
-    // Project Leader routes
-    Route::middleware(['can:project-leader'])->group(function () {
-        Route::get('/my-grants', [ResearchGrantController::class, 'myGrants'])->name('grants.my');
+    // Grant team and milestone management routes (accessible by admin, staff, and project leaders)
+    Route::middleware(['can:manage-members,grant'])->group(function () {
+        Route::post('/grants/{grant}/members', [ResearchGrantController::class, 'updateMembers'])
+            ->name('grants.members.update');
+        Route::delete('/grants/{grant}/members', [ResearchGrantController::class, 'removeMember'])
+            ->name('grants.members.remove');
     });
 
-    // Grant management routes (accessible by both admin and project leaders)
-    Route::post('/grants/{grant}/members', [ResearchGrantController::class, 'updateMembers'])
-        ->middleware('can:manage-members,grant')
-        ->name('grants.members.update');
-
-    // Milestone routes with grant management authorization
-    Route::middleware(['can:manage-grant,grant'])->group(function () {
+    Route::middleware(['can:manage-milestones,grant'])->group(function () {
         Route::post('/grants/{grant}/milestones', [MilestoneController::class, 'store'])->name('milestones.store');
         Route::put('/grants/{grant}/milestones/{milestone}', [MilestoneController::class, 'update'])->name('milestones.update');
         Route::delete('/grants/{grant}/milestones/{milestone}', [MilestoneController::class, 'destroy'])->name('milestones.destroy');

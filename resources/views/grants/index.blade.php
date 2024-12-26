@@ -94,6 +94,8 @@
                                     </th>
                                     <th>Provider</th>
                                     <th>Duration (months)</th>
+                                    <th>Start Date</th>
+                                    <th>Expected Completion</th>
                                     <th>Project Leader</th>
                                     @if(auth()->user()->role === 'Academician')
                                         <th>Your Role</th>
@@ -108,6 +110,8 @@
                                     <td>RM {{ number_format($grant->grant_amount, 2) }}</td>
                                     <td>{{ $grant->grant_provider }}</td>
                                     <td>{{ $grant->duration }}</td>
+                                    <td>{{ $grant->start_date ? $grant->start_date->format('d M Y') : '-' }}</td>
+                                    <td>{{ $grant->getCompletionDate() ? $grant->getCompletionDate()->format('d M Y') : '-' }}</td>
                                     <td>{{ $grant->projectLeader->name }}</td>
                                     @if(auth()->user()->role === 'Academician')
                                         <td>

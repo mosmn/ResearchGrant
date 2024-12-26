@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->decimal('grant_amount', 15, 2);
             $table->string('grant_provider');
+            // start date
             $table->integer('duration');
             $table->foreignId('academician_id')->constrained('academicians')->onDelete('cascade');
             $table->timestamps();

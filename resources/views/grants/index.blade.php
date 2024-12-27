@@ -142,10 +142,29 @@
                             </tbody>
                         </table>
                     </div>
-                    {{ $grants->links() }}
+                    <div class="d-flex justify-content-center">
+                        {{ $grants->links('pagination::bootstrap-5') }}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+    .pagination {
+        padding-left: 1rem;
+        --bs-pagination-font-size: 0.875rem;
+    }
+    .page-link {
+        min-width: 36px;
+        height: 36px;
+        padding: 0.375rem 0.75rem;
+    }
+    .page-link i {
+        font-size: 1rem;
+    }
+</style>
+@endpush

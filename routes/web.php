@@ -27,17 +27,29 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::middleware(['auth'])->group(function () {
+    // Admin only routes
+    Route::middleware(['can:admin-executive'])->group(function () {
+        Route::resource('academicians', AcademicianController::class);
+    });
+
     // Admin and Staff only routes
     Route::middleware(['can:manage-grant'])->group(function () {
         Route::resource('grants', ResearchGrantController::class)->except(['index', 'show']);
-        Route::resource('academicians', AcademicianController::class);
     });
+
+    // Academician specific routes
+    Route::get('/my-grants', [ResearchGrantController::class, 'myGrants'])->name('grants.my');
 
     // Routes accessible by all authenticated users
     Route::get('/grants', [ResearchGrantController::class, 'index'])->name('grants.index');
     Route::get('/grants/{grant}', [ResearchGrantController::class, 'show'])->name('grants.show');
 
-    // Grant team and milestone management routes (accessible by admin, staff, and project leaders)
+    // Profile routes
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+
+    // Grant team and milestone management routes
     Route::middleware(['can:manage-members,grant'])->group(function () {
         Route::post('/grants/{grant}/members', [ResearchGrantController::class, 'updateMembers'])
             ->name('grants.members.update');

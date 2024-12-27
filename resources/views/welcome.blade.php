@@ -1,10 +1,12 @@
 @extends('layouts.app')
 
+@section('body-class', 'welcome-page')
+
 @section('content')
 <div class="container-fluid p-0">
     <!-- Hero Section -->
-    <div class="bg-primary text-white py-5">
-        <div class="container">
+    <div class="bg-primary text-white hero-section">
+        <div class="container pb-5">
             <div class="row align-items-center">
                 <div class="col-md-8 text-center text-md-start">
                     <h1 class="display-4 fw-bold mb-4">Research Grant Management System</h1>
@@ -50,19 +52,6 @@
                     <i class="bi bi-calendar-check display-5 text-primary mb-3"></i>
                     <h4>Milestone Management</h4>
                     <p>Set and track research milestones and deliverables</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Contact Section -->
-    <div class="bg-light py-5">
-        <div class="container">
-            <h2 class="text-center mb-4">Get in Touch</h2>
-            <div class="row justify-content-center">
-                <div class="col-md-8 text-center">
-                    <p class="mb-4">Have questions about our research grant management system?</p>
-                    <a href="mailto:contact@example.com" class="btn btn-primary btn-lg">Contact Us</a>
                 </div>
             </div>
         </div>

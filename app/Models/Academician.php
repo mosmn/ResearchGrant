@@ -10,7 +10,11 @@ class Academician extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'email', 'college', 'department', 'position', 'user_id'
+        'name',
+        'email',
+        'college',
+        'department',
+        'position',
     ];
 
     public function user()

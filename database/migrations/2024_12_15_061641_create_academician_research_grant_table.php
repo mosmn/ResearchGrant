@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('academician_id')->constrained('academicians')->onDelete('cascade');
             $table->timestamps();
         });
-    }
+    } 
 
     /**
      * Reverse the migrations.

@@ -117,8 +117,10 @@ class ResearchGrantController extends Controller
             ->with('projectLeader')
             ->latest()
             ->paginate(10);
-        
-        return view('grants.index', compact('grants'));
+
+        $providers = ResearchGrant::distinct('grant_provider')->pluck('grant_provider');
+
+        return view('grants.index', compact('grants', 'providers'));
     }
 
     public function updateMembers(Request $request, ResearchGrant $grant)

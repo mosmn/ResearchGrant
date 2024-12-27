@@ -13,20 +13,43 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    @stack('styles')
     <style>
         body {
             background-color: #f8f9fa;
             overflow-x: hidden;
+            padding-top: 56px; /* Add padding to account for fixed navbar */
+        }
+        
+        body.welcome-page {
+            padding-top: 0;
+        }
+
+        body.welcome-page .hero-section {
+            margin-top: -56px;
+            padding-top: calc(56px + 3rem);
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 1030; 
         }
         .sidebar {
             min-width: 250px;
             max-width: 250px;
-            min-height: 100vh;
+            height: calc(100vh - 56px); 
             transition: all 0.3s;
             background-color: #343a40;
             position: fixed;
-            z-index: 999;
-            height: 100%;
+            top: 56px; 
+            left: 0;
+            z-index: 1020;
+            padding-top: 1rem; 
+            overflow-y: auto; 
+            margin-top: -1px; 
         }
         .sidebar.collapsed {
             margin-left: -250px;
@@ -42,6 +65,8 @@
             transition: all 0.3s;
             width: calc(100% - 250px);
             margin-left: 250px;
+            min-height: calc(100vh - 56px); /* Adjust for navbar height */
+            padding-top: 20px; /* Add some padding at the top */
         }
         .content.expanded {
             width: 100%;
@@ -55,10 +80,16 @@
                 width: 100%;
                 margin-left: 0;
             }
+            .sidebar {
+                margin-left: -250px;
+            }
+            .sidebar.collapsed {
+                margin-left: 0;
+            }
         }
     </style>
 </head>
-<body>
+<body class="@yield('body-class')">
     <div id="app">
         <!-- Navbar -->
         <nav class="navbar navbar-expand-md navbar-dark bg-primary shadow-sm">
@@ -139,14 +170,51 @@
                     <h5 class="text-white">Menu</h5>
                     <ul class="nav flex-column mt-4">
                         <li class="nav-item">
-                            <a class="nav-link text-white {{ request()->routeIs('grants.index') ? 'active' : '' }}" href="{{ route('grants.index') }}">
-                                <i class="bi bi-folder2-open me-2"></i> Grants
+                            <a class="nav-link text-white {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
+                                <i class="bi bi-house-door me-2"></i> Dashboard
                             </a>
                         </li>
-                        <!-- Add more navigation links as needed -->
+
+                        <!-- Grant Management -->
                         <li class="nav-item">
-                            <a class="nav-link text-white" href="#">
-                                <i class="bi bi-gear me-2"></i> Settings
+                            <a class="nav-link text-white {{ request()->routeIs('grants.*') && !request()->routeIs('grants.my') ? 'active' : '' }}" href="{{ route('grants.index') }}">
+                                <i class="bi bi-folder2-open me-2"></i> Research Grants
+                            </a>
+                        </li>
+
+                        @if(auth()->user()->role === 'Academician')
+                        <li class="nav-item">
+                            <a class="nav-link text-white {{ request()->routeIs('grants.my') ? 'active' : '' }}" href="{{ route('grants.my') }}">
+                                <i class="bi bi-person-workspace me-2"></i> My Grants
+                            </a>
+                        </li>
+                        @endif
+
+                        <!-- Admin Only Menu Items -->
+                        @can('admin-executive')
+                        <li class="nav-item mt-3">
+                            <h6 class="text-muted px-3">Administration</h6>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white {{ request()->routeIs('academicians.*') ? 'active' : '' }}" href="{{ route('academicians.index') }}">
+                                <i class="bi bi-people me-2"></i> Manage Academicians
+                            </a>
+                        </li>
+                        @endcan
+
+                        <!-- Settings -->
+                        <li class="nav-item mt-3">
+                            <h6 class="text-muted px-3">User</h6>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white {{ request()->routeIs('profile.*') ? 'active' : '' }}" href="{{ route('profile.show') }}">
+                                <i class="bi bi-person me-2"></i> Profile
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ route('logout') }}"
+                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <i class="bi bi-box-arrow-left me-2"></i> Logout
                             </a>
                         </li>
                     </ul>
@@ -168,7 +236,6 @@
         </div>
     </div>
 
-    <!-- Updated Scripts for Sidebar Toggle -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const sidebarToggle = document.getElementById('sidebarToggle');
